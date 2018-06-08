@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.views.generic.list import ListView
 
 from .models import Game
 from .forms import MoveForm
@@ -24,3 +25,6 @@ def make_move(req, id):
     return redirect('gameplay_detail', id)
   else:
     return render(req, 'gameplay/game_detail.html', {'game': game, 'form': form})
+
+class AllGamesList(ListView):
+  model = Game

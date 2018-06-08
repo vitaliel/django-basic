@@ -7,14 +7,14 @@
             {% if game.status == 'D' %}
               -- Draw
             {% elif game.status == 'W' and user == game.first_player %}
-              -- Your won!
+              -- You won!
             {% elif game.status == 'L' and user == game.second_player %}
-              -- Your won!
+              -- You won!
             {% else %}
               -- You lost
             {% endif %}
           {% endif %}
-          <span class="badge badge-secondary">{{ game.move_set.count }}</span>
+          <span class="badge badge-pill badge-secondary float-right">{{ game.move_set.count }}</span>
         </a>
     {% endfor %}
   </div>
