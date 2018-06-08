@@ -1,9 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Home</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% block content %}
   <h1>Welcome, {{ user.username }} </h1>
   <p>Hi!</p>
   <ul>
@@ -13,5 +9,4 @@
       </li>
     {% endfor %}
   </ul>
-</body>
-</html>
+{% endblock %}
