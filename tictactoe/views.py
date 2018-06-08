@@ -1,4 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 def welcome(req):
-  return render(req, 'tictactoe/welcome.html')
+  if req.user.is_authenticated:
+    return redirect('player_home')
+  else:
+    return render(req, 'tictactoe/welcome.html')
