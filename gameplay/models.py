@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 GAME_STATUS_CHOISES = (
   ('F', 'First Player To Move'),
@@ -47,6 +48,30 @@ class Game(models.Model):
     return (user == self.first_player and self.status == 'F') or \
       (user == self.second_player and self.status == 'S')
 
+  def new_move(self):
+    """Returns a new move object with player, game, and count preset"""
+    if self.status not in 'FS':
+      raise ValueError("Cannot make move on finished game")
+
+    return Move(game = self, by_first_player = self.status == 'F')
+
+  def update_after_move(self, move):
+    """Update the status of the game, given the last move"""
+    self.status = self._get_game_status_after_move(move)
+
+  def _get_game_status_after_move(self, move):
+    x, y = move.x, move.y
+    board = self.board()
+    if (board[y][0] == board[y][1] == board[y][2]) or \
+      (board[0][x] == board[1][x] == board[2][x]) or \
+      (board[0][0] == board[1][1] == board[2][2]) or \
+      (board[0][2] == board[1][1] == board[2][0]):
+      return 'W' if move.by_first_player else 'L'
+    if self.move_set.count() >= BOARD_SIZE ** 2:
+      return 'D'
+
+    return 'S' if self.status == 'F' else 'F'
+
   def get_absolute_url(self):
     return reverse('gameplay_detail', args=[self.id])
 
@@ -54,8 +79,23 @@ class Game(models.Model):
     return "{0} vs {1}".format(self.first_player, self.second_player)
 
 class Move(models.Model):
-  x = models.IntegerField()
-  y = models.IntegerField()
+  x = models.IntegerField(
+    validators=[MinValueValidator(0), MaxValueValidator(BOARD_SIZE-1)]
+  )
+  y = models.IntegerField(
+    validators=[MinValueValidator(0), MaxValueValidator(BOARD_SIZE-1)]
+  )
   comment = models.CharField(max_length = 300, blank = True)
   by_first_player = models.BooleanField(editable = False)
   game = models.ForeignKey(Game, editable = False, on_delete = models.CASCADE)
+
+  def __eq__(self, other):
+    if other is None:
+      return False
+
+    return self.by_first_player == other.by_first_player
+
+  def save(self, *args, **kwargs):
+    super(Move, self).save(*args, **kwargs)
+    self.game.update_after_move(self)
+    self.game.save()

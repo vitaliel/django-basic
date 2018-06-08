@@ -10,10 +10,12 @@ from gameplay.models import Game
 def home(req):
   my_games = Game.objects.games_for_user(req.user)
   active_games = my_games.active()
+  finished_games = my_games.difference(active_games)
   invitations = req.user.invitations_received.all()
 
   return render(req, "player/home.html", {
-    'games': active_games,
+    'active_games': active_games,
+    'finished_games': finished_games,
     'invitations': invitations,
   })
 
