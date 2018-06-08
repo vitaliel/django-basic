@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 
 {% block title %}
 New Invitation
@@ -9,7 +10,7 @@ New Invitation
     {% csrf_token %}
 
     <table>
-      {{ form }}
+      {{ form | crispy }}
     </table>
     <button class="btn btn-success" type="submit">Send the invitation</button>
   </form>

@@ -1,20 +1,23 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 
 from .forms import InvitationForm
 from .models import Invitation
 from gameplay.models import Game
 
-@login_required
+@login_required()
 def home(req):
   my_games = Game.objects.games_for_user(req.user)
   active_games = my_games.active()
+  invitations = req.user.invitations_received.all()
 
-  return render(req, "player/home.html",
-    {'games': active_games}
-  )
+  return render(req, "player/home.html", {
+    'games': active_games,
+    'invitations': invitations,
+  })
 
-@login_required
+@login_required()
 def new_invitation(req):
   if req.method == "POST":
     invitation = Invitation(from_user=req.user)
@@ -26,3 +29,21 @@ def new_invitation(req):
     form = InvitationForm()
 
   return render(req, "player/new_invitation_form.html", {'form': form})
+
+@login_required()
+def accept_invitation(req, id):
+  invitation = get_object_or_404(Invitation, pk=id)
+  if not req.user == invitation.to_user:
+    raise PermissionDenied
+  if req.method == "POST":
+    if "accept" in req.POST:
+      game = Game.objects.create(
+        first_player=invitation.to_user,
+        second_player=invitation.from_user
+      )
+    invitation.delete()
+    return redirect('player_home')
+  else:
+    return render(req, "player/accept_invitation_form.html",
+      {'invitation': invitation}
+    )
