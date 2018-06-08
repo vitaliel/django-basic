@@ -6,7 +6,9 @@
 <head>
   <meta charset="utf-8">
   <title>{% block title %}{% endblock %}</title>
-  {% bootstrap_css %}
+  {% block styling %}
+    {% bootstrap_css %}
+  {% endblock %}
 </head>
 <body>
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
