@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}
+Signup
+{% endblock %}
+
+{% block content %}
+  <form role="form" action="{% url 'player_signup' %}" method="post">
+    {% csrf_token %}
+    <p>Please fill in the form below to create an account.</p>
+    <table>
+      {{ form | crispy }}
+    </table>
+    <button class="btn btn-success" type="submit">Sign up</button>
+  </form>
+{% endblock %}
